@@ -178,11 +178,29 @@ def hill_climbing(problem, start_board):
         return current
     """
 
+    #looks at all neighbours, if the best one is better than the current, it moves to it
+
     current = start_board
+    current_cost = count_conflicts(current)
 
-    # TODO
+    while True:
 
-    pass
+        neighbours = generate_neighbours(problem, current)
+
+        # Find the neighbour with the lowest conflict count
+        # the key= part tells min to judge eacg board by its conflict count .
+        best_neighbour = min(neighbours, key=count_conflicts)
+        best_cost = count_conflicts(best_neighbour)
+
+        # If the best neighbour is not strictly better, stop.
+        if best_cost >= current_cost:
+            return current
+
+        # Otherwise, move to the better neighbour and repeat.
+        current = best_neighbour
+        current_cost = best_cost
+
+        #this is a greedy algorithm and has no memory, it only looks at the best neighbour and moves to it
 
 
 # --------------------------------------------------
@@ -249,3 +267,27 @@ if __name__ == "__main__":
     print(
         f"{len(neighbours)} neighbours generated"
     )
+
+    # --------------------------------------------------
+    # EXPERIMENT (Task 4) — HILL CLIMBING, 5 ATTEMPTS
+    # --------------------------------------------------
+
+    print("\n--- Hill Climbing: 5 attempts ---")
+
+    for attempt in range(1, 6):
+
+        start = [
+            random.randint(0, N - 1)
+            for _ in range(N)
+        ]
+
+        problem = QueensProblem(start)
+
+        final = hill_climbing(problem, start)
+
+        print(
+            f"Attempt {attempt}: "
+            f"start cost = {count_conflicts(start)}, "
+            f"final cost = {count_conflicts(final)}"
+        )
+
