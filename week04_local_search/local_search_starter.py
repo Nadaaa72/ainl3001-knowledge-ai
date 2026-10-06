@@ -114,15 +114,39 @@ def generate_neighbours(problem, board):
         problem.result(state, action)
     """
 
+    #generates all neighbouring boards so that local search can look around the current state and choose where to go next
+
     neighbours = []
 
-    # TODO:
-    #
-    # 1. Ask the problem for the available actions.
-    # 2. Apply each action.
-    # 3. Add the resulting state to neighbours.
+    #Ask the problem for the available actions.
+    for action in problem.actions(board):
+
+        #Apply each action.
+        new_board = problem.result(board, action)
+
+        #Add the resulting state to neighbours.
+        neighbours.append(new_board)
 
     return neighbours
+
+    """
+    The README's questions:
+
+    How many alternative rows can each queen move to?
+    7. the board has 8 rows and the queen already occupies one of them.
+
+    How many neighbours should be generated?
+    8 queens × 7 rows = 56. when you run this it prints 56 actions available and
+    56 neighbours generated
+
+
+    Why might this become expensive for large boards?
+    The count is N×(N−1), which grows roughly like N². For N=100 that's
+    9,900 neighbours
+    we evaluate the cost of every one of them on every of Hill Climbing. 
+    Bigger board = far more work per step.
+
+    """
 
 
 # --------------------------------------------------
