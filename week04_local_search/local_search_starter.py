@@ -219,13 +219,49 @@ def simulated_annealing(problem, start_board):
     """
 
     current = start_board
+    current_cost = count_conflicts(current)
 
     temperature = 10.0
     cooling_rate = 0.95
 
-    # TODO
+    # How many random moves we try at each temperature
+    # before cooling down a little.
+    steps_per_temperature = 100
 
-    pass
+    while temperature > 0.01 and current_cost > 0:
+
+        for _ in range(steps_per_temperature):
+
+            # Pick one random neighbour (not the best one).
+            action = random.choice(problem.actions(current))
+            candidate = problem.result(current, action)
+            candidate_cost = count_conflicts(candidate)
+
+            # How much worse (positive) or better (negative)
+            # is the candidate?
+            change = candidate_cost - current_cost
+
+            if change <= 0:
+                # Better (or equal): always accept.
+                accept = True
+            else:
+                # Worse: accept sometimes.
+                # High temperature = probability close to 1.
+                # Low temperature  = probability close to 0.
+                probability = math.exp(-change / temperature)
+                accept = random.random() < probability
+
+            if accept:
+                current = candidate
+                current_cost = candidate_cost
+
+            if current_cost == 0:
+                return current
+
+        # Cool down and become more picky.
+        temperature = temperature * cooling_rate
+
+    return current
 
 
 # --------------------------------------------------
@@ -291,3 +327,41 @@ if __name__ == "__main__":
             f"final cost = {count_conflicts(final)}"
         )
 
+    # --------------------------------------------------
+    # EXPERIMENT (Task 5.1) — COMPARE THE ALGORITHMS
+    # --------------------------------------------------
+
+    print("\n--- Comparison: 10 runs each ---")
+
+    hc_costs = []
+    sa_costs = []
+
+    for _ in range(10):
+
+        start = [
+            random.randint(0, N - 1)
+            for _ in range(N)
+        ]
+
+        problem = QueensProblem(start)
+
+        hc_final = hill_climbing(problem, start)
+        sa_final = simulated_annealing(problem, start)
+
+        hc_costs.append(count_conflicts(hc_final))
+        sa_costs.append(count_conflicts(sa_final))
+
+    print("Hill Climbing final costs:      ", hc_costs)
+    print("Simulated Annealing final costs:", sa_costs)
+
+    print("\nBest cost found by Hill Climbing:      ", min(hc_costs))
+    print("Best cost found by Simulated Annealing:", min(sa_costs))
+
+    print(
+        "\nHill Climbing solved "
+        f"{hc_costs.count(0)} / 10 runs"
+    )
+    print(
+        "Simulated Annealing solved "
+        f"{sa_costs.count(0)} / 10 runs"
+    )
