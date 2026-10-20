@@ -152,7 +152,30 @@ def minimax(state, maximizing, counter):
     # 3. For X (MAX), recursively choose the highest score.
     # 4. For O (MIN), recursively choose the lowest score.
     # Use make_move() to avoid changing the original board.
-    pass
+    counter["nodes"] += 1
+
+    # The game is over, so just return the score.
+    if is_terminal(state):
+        return utility(state)
+
+    if maximizing:
+        # X's turn: X wants the HIGHEST score.
+        best_score = -100   # lower than any real score
+        for move in available_moves(state):
+            new_board = make_move(state, move, "X")
+            score = minimax(new_board, False, counter)  # now O plays
+            if score > best_score:
+                best_score = score
+        return best_score
+    else:
+        # O's turn: O wants the LOWEST score.
+        best_score = 100    # higher than any real score
+        for move in available_moves(state):
+            new_board = make_move(state, move, "O")
+            score = minimax(new_board, True, counter)   # now X plays
+            if score < best_score:
+                best_score = score
+        return best_score
 
 
 # --------------------------------------------------
@@ -167,7 +190,19 @@ def best_move(state, counter):
     # TODO: Try each legal X move, call minimax() for O's turn,
     # and return the move with the highest score.
     # If the board is terminal, return None.
-    pass
+    if is_terminal(state):
+        return None
+
+    chosen_move = None
+    best_score = -100
+    for move in available_moves(state):
+        new_board = make_move(state, move, "X")
+        score = minimax(new_board, False, counter)  # after X moves, O plays
+        # ">" (not ">=") keeps the FIRST move if two moves tie.
+        if score > best_score:
+            best_score = score
+            chosen_move = move
+    return chosen_move
 
 
 # --------------------------------------------------
