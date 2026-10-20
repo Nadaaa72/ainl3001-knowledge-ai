@@ -219,7 +219,35 @@ def alpha_beta(state, maximizing, alpha, beta, counter):
     # - MAX updates alpha; MIN updates beta.
     # - Stop exploring remaining moves if alpha >= beta.
     # - Count visited nodes exactly as in minimax().
-    pass
+    counter["nodes"] += 1
+
+    if is_terminal(state):
+        return utility(state)
+
+    if maximizing:
+        best_score = -100
+        for move in available_moves(state):
+            new_board = make_move(state, move, "X")
+            score = alpha_beta(new_board, False, alpha, beta, counter)
+            if score > best_score:
+                best_score = score
+            if best_score > alpha:
+                alpha = best_score
+            if alpha >= beta:
+                break   # O would never let the game get here, so stop
+        return best_score
+    else:
+        best_score = 100
+        for move in available_moves(state):
+            new_board = make_move(state, move, "O")
+            score = alpha_beta(new_board, True, alpha, beta, counter)
+            if score < best_score:
+                best_score = score
+            if best_score < beta:
+                beta = best_score
+            if alpha >= beta:
+                break   # X already has a better option, so stop
+        return best_score
 
 
 # --------------------------------------------------
@@ -231,7 +259,19 @@ def best_move_alpha_beta(state, counter):
     # TODO: Like best_move(), but call alpha_beta().
     # Start alpha at -infinity and beta at +infinity.
     # Update alpha after each candidate X move.
-    pass
+    if is_terminal(state):
+        return None
+
+    chosen_move = None
+    alpha = -100   # acts as "minus infinity"
+    beta = 100     # acts as "plus infinity"
+    for move in available_moves(state):
+        new_board = make_move(state, move, "X")
+        score = alpha_beta(new_board, False, alpha, beta, counter)
+        if score > alpha:
+            alpha = score   # best score X can guarantee so far
+            chosen_move = move
+    return chosen_move
 
 
 # --------------------------------------------------
@@ -283,3 +323,17 @@ if __name__ == "__main__":
     print("3. What is the purpose of a utility function?")
     print("4. What happens as games become larger?")
 
+# --------------------------------------------------
+# MY RESULTS AND ANSWERS
+# --------------------------------------------------
+# Task 0: left MIN = min(3, 5) = 3, right MIN = min(2, 9) = 2.
+#         MAX = max(3, 2) = 3, so MAX takes the LEFT branch. The 9 on
+#         the right is a trap: O would never allow it and would play 2.
+#
+# Task 6 results (same starting board):
+#   | Algorithm  | Chosen move | Nodes visited |
+#   | Minimax    | 5           | 31            |
+#   | Alpha-Beta | 5           | 17            |
+#   Same move and same game value, but Alpha-Beta visits fewer nodes.
+#   Pruning depends on move ordering: trying the best moves first
+#   prunes the most; a bad order can prune nothing at all.
