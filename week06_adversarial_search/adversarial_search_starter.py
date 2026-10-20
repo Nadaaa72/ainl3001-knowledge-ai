@@ -54,7 +54,11 @@ WINNING_LINES = [
 def print_board(state):
     """Display the nine cells as a 3-by-3 board."""
     # TODO: Print three rows of three cells.
-    pass
+    print(state[0], "|", state[1], "|", state[2])
+    print("--+---+--")
+    print(state[3], "|", state[4], "|", state[5])
+    print("--+---+--")
+    print(state[6], "|", state[7], "|", state[8])
 
 
 # --------------------------------------------------
@@ -64,7 +68,11 @@ def print_board(state):
 def available_moves(state):
     """Return indices of empty cells (0 through 8)."""
     # TODO: Find every position containing " ".
-    pass
+    moves = []
+    for i in range(9):
+        if state[i] == " ":
+            moves.append(i)
+    return moves
 
 
 # --------------------------------------------------
@@ -77,7 +85,9 @@ def make_move(state, move, player):
     Assume move is legal. Do not modify the input board.
     """
     # TODO: Copy the board and place the player's mark.
-    pass
+    new_state = state.copy()  # copy, so the original board does not change
+    new_state[move] = player
+    return new_state
 
 
 # --------------------------------------------------
@@ -87,7 +97,11 @@ def make_move(state, move, player):
 def check_winner(state):
     """Return 'X', 'O' or None by checking all winning lines."""
     # TODO: Check each (a, b, c) in WINNING_LINES.
-    pass
+    for a, b, c in WINNING_LINES:
+        # A line wins if all three cells have the same mark (not empty).
+        if state[a] != " " and state[a] == state[b] and state[b] == state[c]:
+            return state[a]
+    return None
 
 
 # --------------------------------------------------
@@ -97,7 +111,11 @@ def check_winner(state):
 def is_terminal(state):
     """Return True for a win or a full board (draw)."""
     # TODO: Detect a winner OR no remaining empty cells.
-    pass
+    if check_winner(state) != None:
+        return True   # someone has won
+    if available_moves(state) == []:
+        return True   # board is full, so it is a draw
+    return False
 
 
 # --------------------------------------------------
@@ -110,7 +128,12 @@ def utility(state):
     Minimax calls this only at terminal states.
     """
     # TODO: Use check_winner() and return +1, -1 or 0.
-    pass
+    winner = check_winner(state)
+    if winner == "X":
+        return 1
+    if winner == "O":
+        return -1
+    return 0
 
 
 # --------------------------------------------------
@@ -188,6 +211,21 @@ if __name__ == "__main__":
     print("Terminal:", is_terminal(board))
     print("Utility:", utility(board))
 
+    # Task 2 checks: one finished board for each possible outcome.
+    x_wins = ["X", "X", "X",
+              "O", "O", " ",
+              " ", " ", " "]
+    o_wins = ["X", "O", "X",
+              "X", "O", " ",
+              " ", "O", " "]
+    draw = ["X", "O", "X",
+            "X", "O", "O",
+            "O", "X", "X"]
+    print("\nTask 2 test boards:")
+    print("X wins:", check_winner(x_wins), is_terminal(x_wins), utility(x_wins))
+    print("O wins:", check_winner(o_wins), is_terminal(o_wins), utility(o_wins))
+    print("Draw:  ", check_winner(draw), is_terminal(draw), utility(draw))
+
     # For a meaningful comparison, both algorithms use the same board
     # and count the same thing: recursive game-tree nodes visited.
     minimax_counter = {"nodes": 0}
@@ -209,3 +247,4 @@ if __name__ == "__main__":
     print("2. Why does Minimax assume an optimal opponent?")
     print("3. What is the purpose of a utility function?")
     print("4. What happens as games become larger?")
+
