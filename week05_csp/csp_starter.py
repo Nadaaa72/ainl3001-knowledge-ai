@@ -105,10 +105,27 @@ def select_unassigned_variable(assignment):
     # For each unassigned variable, temporarily try each colour,
     # check is_valid_assignment(), and undo the temporary assignment.
     # Count legal colours and choose the variable with the fewest.
+    best_variable = None
+    fewest_legal = None
+
     for variable in variables:
-        if variable not in assignment:
-            return variable
-    return None  # every region already has a colour
+        if variable in assignment:
+            continue  # already coloured, skip it
+
+        # Count how many colours this region could still take.
+        legal_count = 0
+        for colour in domains[variable]:
+            assignment[variable] = colour          # try it temporarily
+            if is_valid_assignment(assignment):
+                legal_count += 1
+            del assignment[variable]               # undo the trial
+
+        # Strict "<" keeps the FIRST region when there is a tie.
+        if fewest_legal is None or legal_count < fewest_legal:
+            best_variable = variable
+            fewest_legal = legal_count
+
+    return best_variable  # None if every region already has a colour
 
 
 # --------------------------------------------------
