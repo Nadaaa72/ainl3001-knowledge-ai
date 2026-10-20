@@ -88,6 +88,21 @@ def is_valid_assignment(assignment):
 # TASK 3 AND TASK 5 — VARIABLE SELECTION
 # --------------------------------------------------
 
+# Extension 1: switch between the two strategies to compare them.
+USE_MRV = True
+
+# Extension 1: how many times backtracking tries a colour for a region.
+attempts = 0
+
+
+def select_first_unassigned(assignment):
+    """Task 3 strategy: return the first region with no colour yet."""
+    for variable in variables:
+        if variable not in assignment:
+            return variable
+    return None  # every region already has a colour
+
+
 def select_unassigned_variable(assignment):
     """Choose the next unassigned region.
 
@@ -105,6 +120,9 @@ def select_unassigned_variable(assignment):
     # For each unassigned variable, temporarily try each colour,
     # check is_valid_assignment(), and undo the temporary assignment.
     # Count legal colours and choose the variable with the fewest.
+    if not USE_MRV:
+        return select_first_unassigned(assignment)
+
     best_variable = None
     fewest_legal = None
 
@@ -149,8 +167,10 @@ def backtracking_search(assignment):
 
     variable = select_unassigned_variable(assignment)
 
+    global attempts
     for colour in domains[variable]:
         assignment[variable] = colour  # try this colour
+        attempts += 1
 
         # Only go deeper if the partial assignment breaks no constraint.
         if is_valid_assignment(assignment):
@@ -206,6 +226,19 @@ if __name__ == "__main__":
         print("No solution yet. Complete the TODO sections.")
 
     print("\nPossible complete assignments:", 3 ** len(variables))
+    print("Attempted colour assignments:", attempts)
+
+    # Extension 1: run the search once with each strategy and compare.
+    print("\nStrategy comparison")
+    print(f"{'Strategy':28}{'Attempts':>10}  Valid?")
+    for use_mrv, name in [(False, "Simple variable selection"),
+                          (True, "MRV")]:
+        USE_MRV = use_mrv
+        attempts = 0
+        result = backtracking_search({})
+        valid = result is not None and is_valid_assignment(result)
+        print(f"{name:28}{attempts:>10}  {valid}")
+
     print("\nReflection:")
     print("1. What causes backtracking?")
     print("2. Why can backtracking be faster than brute force?")
